@@ -15,14 +15,12 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class RequestCreateDto {
 
-    @NotNull
     @NotBlank
     private String app;
 
     @NotBlank
     private String uri;
 
-    @NotNull
     @NotBlank
     private String ip;
 

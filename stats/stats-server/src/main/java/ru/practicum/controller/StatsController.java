@@ -29,20 +29,19 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<RequestOutputDto> getStatsRequest(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                                                  @RequestParam(required = false) List<String> uris,
-                                                  @RequestParam(required = false) Boolean unique) {
+    public List<RequestOutputDto> getStatsRequest(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+            @RequestParam(required = false) List<String> uris,
+            @RequestParam(defaultValue = "false") Boolean unique) {
 
         if (uris == null || uris.isEmpty()) {
             uris = Collections.emptyList();
         }
-        if (unique == null) {
-            unique = false;
-        }
 
         log.info("Получен запрос получения статистики по посещениям с параметрами: start: {}; end: {}, uris: {}, unique: {}",
                 start, end, uris, unique);
+
         return statsService.getStatsRequest(start, end, uris, unique);
     }
 
