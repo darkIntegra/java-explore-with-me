@@ -1,47 +1,36 @@
 package ru.practicum.repository;
 
+import ru.practicum.model.Stats;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
+import ru.practicum.model.EndpointHit;
 import org.springframework.data.jpa.repository.Query;
-import ru.practicum.RequestOutputDto;
-import ru.practicum.model.Request;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface StatsRepository extends JpaRepository<Request, Long> {
+public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
+    @Query("""
+            SELECT new ru.practicum.model.Stats(h.app, h.uri, COUNT(h.ip))
+            FROM EndpointHit as h
+            WHERE h.timestamp BETWEEN :start AND :end
+            AND (:uris IS NULL OR h.uri IN :uris)
+            GROUP BY h.app, h.uri
+            ORDER BY COUNT(h.ip) DESC
+            """)
+    List<Stats> findStats(@Param("start") LocalDateTime start,
+                          @Param("end") LocalDateTime end,
+                          @Param("uris") List<String> uris);
 
-    // Статистика посещений за период
-    @Query(value = "SELECT new ru.practicum.RequestOutputDto(r.app, r.uri, COUNT(r.ip) hits)" +
-            "FROM Request r " +
-            "WHERE r.timestamp between ?1 and ?2 " +
-            "GROUP BY r.app, r.uri " +
-            "ORDER BY hits DESC ")
-    List<RequestOutputDto> getAllRequestsByPeriod(LocalDateTime start, LocalDateTime end);
-
-    // Статистика уникальных посещений за период
-    @Query(value = "SELECT new ru.practicum.RequestOutputDto(r.app, r.uri, COUNT(DISTINCT r.ip) hits)" +
-            "FROM Request r " +
-            "WHERE r.timestamp between ?1 and ?2 " +
-            "GROUP BY r.app, r.uri " +
-            "ORDER BY hits DESC ")
-    List<RequestOutputDto> getUniqueRequestsByPeriod(LocalDateTime start, LocalDateTime end);
-
-    // Статистика посещений за период по списку uri
-    @Query(value = "SELECT new ru.practicum.RequestOutputDto(r.app, r.uri, COUNT(r.ip) hits)" +
-            "FROM Request r " +
-            "WHERE r.timestamp between ?1 and ?2 " +
-            "  AND r.uri in ?3 " +
-            "GROUP BY r.app, r.uri " +
-            "ORDER BY hits DESC ")
-    List<RequestOutputDto> qetRequestByPeriodWithUris(LocalDateTime start, LocalDateTime end, List<String> uris);
-
-    // Статистика уникальных посещений за период по списку uri
-    @Query(value = "SELECT new ru.practicum.RequestOutputDto(r.app, r.uri, COUNT(DISTINCT r.ip) hits)" +
-            "FROM Request r " +
-            "WHERE r.timestamp between ?1 and ?2 " +
-            "  AND r.uri in ?3 " +
-            "GROUP BY r.app, r.uri " +
-            "ORDER BY hits DESC ")
-    List<RequestOutputDto> qetUniqueRequestByPeriodWithUris(LocalDateTime start, LocalDateTime end, List<String> uris);
-
+    @Query("""
+            SELECT new ru.practicum.model.Stats(h.app, h.uri, COUNT(DISTINCT h.ip))
+            FROM EndpointHit as h
+            WHERE h.timestamp BETWEEN :start AND :end
+            AND (:uris IS NULL OR h.uri IN :uris)
+            GROUP BY h.app, h.uri
+            ORDER BY COUNT(DISTINCT h.ip) DESC
+            """)
+    List<Stats> findUniqueStats(@Param("start") LocalDateTime start,
+                                @Param("end") LocalDateTime end,
+                                @Param("uris") List<String> uris);
 }
