@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.entities.event.model.Event;
-import ru.practicum.entities.event.model.dto.EventSearchAdmin;
-import ru.practicum.entities.event.model.dto.EventSearchCommon;
+import ru.practicum.entities.event.model.dto.AdminEventSearch;
+import ru.practicum.entities.event.model.dto.PublicEventSearch;
 import ru.practicum.entities.event.model.enums.EventState;
 
 import java.time.LocalDateTime;
@@ -43,21 +43,21 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("currentTime") LocalDateTime currentTime,
             Pageable pageable);
 
-    default List<Event> findCommonEventsByFilters(EventSearchCommon eventSearchCommon) {
+    default List<Event> findCommonEventsByFilters(PublicEventSearch publicEventSearch) {
         Pageable pageable = Pageable.unpaged();
-        Integer from = eventSearchCommon.getFrom();
-        Integer size = eventSearchCommon.getSize();
+        Integer from = publicEventSearch.getFrom();
+        Integer size = publicEventSearch.getSize();
         if (from != null && size != null) {
             pageable = Pageable.ofSize(size).withPage(from / size);
         }
         return findCommonEventsByFilters(
-                eventSearchCommon.getText(),
-                eventSearchCommon.getPaid(),
-                eventSearchCommon.getCategories(),
-                eventSearchCommon.getRangeStart(),
-                eventSearchCommon.getRangeEnd(),
-                eventSearchCommon.getOnlyAvailable(),
-                eventSearchCommon.getSort().name(),
+                publicEventSearch.getText(),
+                publicEventSearch.getPaid(),
+                publicEventSearch.getCategories(),
+                publicEventSearch.getRangeStart(),
+                publicEventSearch.getRangeEnd(),
+                publicEventSearch.getOnlyAvailable(),
+                publicEventSearch.getSort().name(),
                 EventState.PUBLISHED,
                 LocalDateTime.now(),
                 pageable);
@@ -78,19 +78,19 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("rangeEnd") LocalDateTime rangeEnd,
             Pageable pageable);
 
-    default List<Event> findAdminEventsByFilters(EventSearchAdmin eventSearchAdmin) {
+    default List<Event> findAdminEventsByFilters(AdminEventSearch adminEventSearch) {
         Pageable pageable = Pageable.unpaged();
-        Integer from = eventSearchAdmin.getFrom();
-        Integer size = eventSearchAdmin.getSize();
+        Integer from = adminEventSearch.getFrom();
+        Integer size = adminEventSearch.getSize();
         if (from != null && size != null) {
             pageable = Pageable.ofSize(size).withPage(from / size);
         }
         return findAdminEventsByFilters(
-                eventSearchAdmin.getUsers(),
-                eventSearchAdmin.getStates(),
-                eventSearchAdmin.getCategories(),
-                eventSearchAdmin.getRangeStart(),
-                eventSearchAdmin.getRangeEnd(),
+                adminEventSearch.getUsers(),
+                adminEventSearch.getStates(),
+                adminEventSearch.getCategories(),
+                adminEventSearch.getRangeStart(),
+                adminEventSearch.getRangeEnd(),
                 pageable
         );
     }

@@ -6,11 +6,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ru.practicum.entities.category.model.dto.CategoryDto;
 import ru.practicum.entities.category.service.CategoryService;
+import ru.practicum.entities.compilation.model.dto.CompilationDto;
+import ru.practicum.entities.compilation.model.dto.NewCompilationDto;
+import ru.practicum.entities.compilation.model.dto.UpdateCompilationRequest;
+import ru.practicum.entities.compilation.service.CompilationService;
+import ru.practicum.entities.event.model.Event;
 import ru.practicum.entities.event.model.dto.EventDto;
-import ru.practicum.entities.event.model.dto.EventSearchAdmin;
+import ru.practicum.entities.event.model.dto.AdminEventSearch;
 import ru.practicum.entities.event.model.dto.UpdateAdminEventDto;
 import ru.practicum.entities.event.service.EventService;
-import ru.practicum.entities.user.model.User;
 import ru.practicum.entities.user.model.dto.UserDto;
 import ru.practicum.entities.user.service.UserService;
 
@@ -21,8 +25,10 @@ import java.util.List;
 public class ServiceAdmin {
 
     private final UserService userService;
-    private final CategoryService categoryService;
+
     private final EventService eventService;
+    private final CompilationService compilationService;
+    private final CategoryService categoryService;
 
     @Transactional
     public CategoryDto createCategory(CategoryDto newCategoryDto) {
@@ -40,7 +46,7 @@ public class ServiceAdmin {
     }
 
     @Transactional
-    public List<EventDto> searchEvents(EventSearchAdmin search) {
+    public List<EventDto> searchEvents(AdminEventSearch search) {
         return eventService.searchAdmin(search);
     }
 
@@ -61,8 +67,23 @@ public class ServiceAdmin {
         userService.delete(userId);
     }
 
-    public User getUserById(Long userId) {
-        return userService.findUserById(userId);
+    @Transactional
+    public CompilationDto createCompilation(NewCompilationDto compilationDto) {
+        return compilationService.createCompilation(compilationDto);
     }
 
+    @Transactional
+    public void deleteCompilation(Long compilationId) {
+        compilationService.deleteCompilation(compilationId);
+    }
+
+    @Transactional
+    public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest updateCompilationRequest) {
+        return compilationService.updateCompilation(compilationId, updateCompilationRequest);
+    }
+
+    @Transactional
+    public Event getEventById(Long eventId) {
+        return eventService.findEventById(eventId);
+    }
 }

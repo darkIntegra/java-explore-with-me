@@ -2,19 +2,21 @@ package ru.practicum.api_controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.api_facade_services.ServiceAdmin;
 
 import ru.practicum.entities.category.model.dto.CategoryDto;
+import ru.practicum.entities.compilation.model.dto.CompilationDto;
+import ru.practicum.entities.compilation.model.dto.NewCompilationDto;
+import ru.practicum.entities.compilation.model.dto.UpdateCompilationRequest;
 import ru.practicum.entities.event.model.dto.EventDto;
-import ru.practicum.entities.event.model.dto.EventSearchAdmin;
+import ru.practicum.entities.event.model.dto.AdminEventSearch;
 import ru.practicum.entities.event.model.dto.UpdateAdminEventDto;
-import ru.practicum.entities.user.model.User;
 import ru.practicum.entities.user.model.dto.UserDto;
 
 import java.time.LocalDateTime;
@@ -23,10 +25,32 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@Slf4j
 public class ControllerAdmin {
 
     private final ServiceAdmin serviceAdmin;
+
+    // Создание категории
+    @PostMapping("/categories")
+    public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
+        CategoryDto createdCategory = serviceAdmin.createCategory(categoryDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+    }
+
+    // Удаление категории
+    @DeleteMapping("/categories/{catId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(@PathVariable Long catId) {
+        serviceAdmin.deleteCategory(catId);
+    }
+
+    // Обновление категории
+    @PatchMapping("/categories/{catId}")
+    public ResponseEntity<CategoryDto> updateCategory(
+            @PathVariable Long catId,
+            @Valid @RequestBody CategoryDto categoryDto) {
+        CategoryDto updatedCategory = serviceAdmin.updateCategory(catId, categoryDto);
+        return ResponseEntity.ok(updatedCategory);
+    }
 
     // Поиск событий с фильтрами (админ)
     @GetMapping("/events")
@@ -38,7 +62,7 @@ public class ControllerAdmin {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "0") Integer from,
             @RequestParam(defaultValue = "10") Integer size) {
-        EventSearchAdmin search = EventSearchAdmin.builder()
+        AdminEventSearch search = AdminEventSearch.builder()
                 .users(users)
                 .states(states)
                 .categories(categories)
@@ -84,33 +108,31 @@ public class ControllerAdmin {
         serviceAdmin.deleteUser(userId);
     }
 
-    // Получение пользователя по ID (админ)
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
-        User user = serviceAdmin.getUserById(userId);
-        return ResponseEntity.ok(user);
+    // Создание подборки событий
+    @PostMapping("/compilations")
+    @Transactional
+    public ResponseEntity<CompilationDto> createCompilation(
+            @Valid @RequestBody NewCompilationDto compilationDto) {
+        CompilationDto createdCompilation = serviceAdmin.createCompilation(compilationDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCompilation);
     }
 
-    // Создание категории (админ)
-    @PostMapping("/categories")
-    public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
-        CategoryDto createdCategory = serviceAdmin.createCategory(categoryDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
-    }
-
-    // Удаление категории (админ)
-    @DeleteMapping("/categories/{catId}")
+    // Удаление подборки событий
+    @DeleteMapping("/compilations/{comId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable Long catId) {
-        serviceAdmin.deleteCategory(catId);
+    @Transactional
+    public void deleteCompilation(
+            @PathVariable Long comId) {
+        serviceAdmin.deleteCompilation(comId);
     }
 
-    // Обновление категории (админ)
-    @PatchMapping("/categories/{catId}")
-    public ResponseEntity<CategoryDto> updateCategory(
-            @PathVariable Long catId,
-            @Valid @RequestBody CategoryDto categoryDto) {
-        CategoryDto updatedCategory = serviceAdmin.updateCategory(catId, categoryDto);
-        return ResponseEntity.ok(updatedCategory);
+    // Обновление подборки событий
+    @PatchMapping("/compilations/{comId}")
+    @Transactional
+    public ResponseEntity<CompilationDto> updateCompilation(
+            @PathVariable Long comId,
+            @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest) {
+        CompilationDto updatedCompilation = serviceAdmin.updateCompilation(comId, updateCompilationRequest);
+        return ResponseEntity.ok(updatedCompilation);
     }
 }

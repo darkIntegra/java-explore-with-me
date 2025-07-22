@@ -1,6 +1,7 @@
 package ru.practicum.entities.event.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import ru.practicum.centralRepository.CategoryRepository;
@@ -30,6 +31,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
@@ -54,7 +56,7 @@ public class EventService {
         return EventMapper.toEventDto(event);
     }
 
-    public List<EventDto> searchCommon(EventSearchCommon search) {
+    public List<EventDto> searchCommon(PublicEventSearch search) {
         if (search.getRangeEnd() != null && search.getRangeStart() != null &&
                 search.getRangeEnd().isBefore(search.getRangeStart())) {
             throw new DateValidationException("Дата начала не должна быть позже даты окончания");
@@ -67,7 +69,7 @@ public class EventService {
     }
 
     @Transactional
-    public List<EventDto> searchAdmin(EventSearchAdmin search) {
+    public List<EventDto> searchAdmin(AdminEventSearch search) {
         List<Event> events = eventRepository.findAdminEventsByFilters(search);
         return events.stream()
                 .map(EventMapper::toEventDto)
@@ -143,33 +145,46 @@ public class EventService {
 
     @Transactional
     public EventDto updateByUser(Long userId, Long eventId, UpdateEventDto eventDto) {
+        log.info("Начало обработки запроса на обновление события. Пользователь ID: {}, Событие ID: {}, DTO: {}", userId, eventId, eventDto);
+
         userService.findUserById(userId);
+        log.debug("Пользователь с ID: {} найден.", userId);
+
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено"));
+        log.debug("Событие с ID: {} найдено.", eventId);
+
         if (!event.getInitiator().getId().equals(userId)) {
+            log.error("Попытка редактирования события пользователем, который не является его создателем. Пользователь ID: {}, Событие ID: {}", userId, eventId);
             throw new ConditionsNotMetException("Событие может редактировать только его создатель");
         }
 
         if (event.getState() == EventState.PUBLISHED) {
+            log.error("Попытка редактирования опубликованного события. Событие ID: {}", eventId);
             throw new ConditionsNotMetException("Нельзя редактировать опубликованное событие");
         }
 
         LocalDateTime eventDate = eventDto.getEventDate() == null ? event.getEventDate() : eventDto.getEventDate();
         if (eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
+            log.error("Дата начала события должна быть не ранее чем через 1 час от даты редактирования. Указанная дата: {}", eventDate);
             throw new DateValidationException("Дата начала события должна быть не ранее чем через 1 час от даты редактирования.");
         }
 
         if (eventDto.getCategory() != null) {
             Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(() -> new NotFoundException("Категория с id=" + eventDto.getCategory() + " не найдена"));
+            log.debug("Категория с ID: {} найдена и будет обновлена для события ID: {}", eventDto.getCategory(), eventId);
             event.setCategory(category);
         }
 
         if (eventDto.getStateAction() == EventUserStateAction.SEND_TO_REVIEW) {
+            log.info("Событие ID: {} отправлено на проверку. Новое состояние: PENDING", eventId);
             event.setState(EventState.PENDING);
         }
         if (eventDto.getStateAction() == EventUserStateAction.CANCEL_REVIEW) {
+            log.info("Отмена проверки события ID: {}. Новое состояние: CANCELED", eventId);
             event.setState(EventState.CANCELED);
         }
 
+        log.debug("Обновление полей события ID: {}", eventId);
         event.setAnnotation(eventDto.getAnnotation() == null ? event.getAnnotation() : eventDto.getAnnotation());
         event.setDescription(eventDto.getDescription() == null ? event.getDescription() : eventDto.getDescription());
         event.setEventDate(eventDate);
@@ -180,7 +195,10 @@ public class EventService {
         event.setLat(eventDto.getLocation() == null ? event.getLat() : eventDto.getLocation().getLat());
         event.setLon(eventDto.getLocation() == null ? event.getLon() : eventDto.getLocation().getLon());
 
-        return EventMapper.toEventDto(eventRepository.save(event));
+        Event updatedEvent = eventRepository.save(event);
+        log.info("Событие ID: {} успешно обновлено.", eventId);
+
+        return EventMapper.toEventDto(updatedEvent);
     }
 
     private Long getViews(Long id) {

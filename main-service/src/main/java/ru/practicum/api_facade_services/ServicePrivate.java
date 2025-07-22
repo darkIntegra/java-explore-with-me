@@ -3,11 +3,6 @@ package ru.practicum.api_facade_services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.entities.compilation.model.dto.CompilationDto;
-import ru.practicum.entities.compilation.model.dto.NewCompilationDto;
-import ru.practicum.entities.compilation.model.dto.UpdateCompilationRequest;
-import ru.practicum.entities.compilation.service.CompilationService;
-import ru.practicum.entities.event.model.Event;
 import ru.practicum.entities.event.model.dto.EventDto;
 import ru.practicum.entities.event.model.dto.UpdateEventDto;
 import ru.practicum.entities.event.service.EventService;
@@ -23,23 +18,7 @@ import java.util.List;
 public class ServicePrivate {
 
     private final EventService eventService;
-    private final CompilationService compilationService;
     private final ParticipationRequestService participationRequestService;
-
-    @Transactional
-    public CompilationDto createCompilation(NewCompilationDto compilationDto) {
-        return compilationService.createCompilation(compilationDto);
-    }
-
-    @Transactional
-    public void deleteCompilation(Long compilationId) {
-        compilationService.deleteCompilation(compilationId);
-    }
-
-    @Transactional
-    public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest updateCompilationRequest) {
-        return compilationService.updateCompilation(compilationId, updateCompilationRequest);
-    }
 
     public List<EventDto> getEventsByUserId(Long userId, Integer from, Integer size) {
         return eventService.findByUserId(userId, from, size);
@@ -47,11 +26,6 @@ public class ServicePrivate {
 
     public EventDto getEventByIdAndUser(Long userId, Long eventId) {
         return eventService.findByIdAndUser(userId, eventId);
-    }
-
-    @Transactional
-    public Event getEventById(Long eventId) {
-        return eventService.findEventById(eventId);
     }
 
     @Transactional

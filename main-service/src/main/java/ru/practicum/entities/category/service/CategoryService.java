@@ -25,10 +25,10 @@ public class CategoryService {
         return categoryRepository.findCategories(from, size).stream().map(CategoryMapper::categoryToDto).toList();
     }
 
-    public CategoryDto getCategoryById(Long id) {
+    public CategoryDto getCategoryById(Long catId) {
         return CategoryMapper.categoryToDto(
-                categoryRepository.findById(id).orElseThrow(() ->
-                        new NotFoundException("Категория с id=" + id + " не найдена")
+                categoryRepository.findById(catId).orElseThrow(
+                        () -> new NotFoundException("Категория с id=" + catId + " не найдена")
                 )
         );
     }

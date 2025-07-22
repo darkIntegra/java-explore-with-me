@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.entities.event.model.enums.EventSearchOrder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,20 +12,16 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventSearchCommon {
-    private String text;
+public class AdminEventSearch {
+    private List<Long> users;
 
-    private Boolean paid;
+    private List<String> states;
+
+    private List<Long> categories;
 
     private LocalDateTime rangeStart;
 
     private LocalDateTime rangeEnd;
-
-    private List<Long> categories;
-
-    private Boolean onlyAvailable;
-
-    private EventSearchOrder sort;
 
     private Integer from;
 
