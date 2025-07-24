@@ -1,6 +1,7 @@
 package ru.practicum.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class StatsClient extends BaseClient {
 
     public StatsClient(@Value("${stats-service.url}") String serverUrl, RestTemplateBuilder builder) {
@@ -24,6 +26,8 @@ public class StatsClient extends BaseClient {
     }
 
     public List<StatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+
+        log.info("Вызван метод getStats с параметрами: start={}, end={}, uris={}, unique={}", start, end, uris, unique);
         String urisParam = String.join(",", uris);
         Map<String, Object> parameters = Map.of(
                 "start", start,

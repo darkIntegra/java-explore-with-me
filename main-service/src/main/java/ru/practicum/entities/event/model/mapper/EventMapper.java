@@ -29,7 +29,7 @@ public class EventMapper {
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
-                .views(event.getViews())
+                .views(0L)
                 .build();
     }
 
@@ -49,7 +49,6 @@ public class EventMapper {
                 .createdOn(LocalDateTime.now())
                 .state(EventState.PENDING)
                 .confirmedRequests(0L)
-                .views(0L)
                 .build();
     }
 }

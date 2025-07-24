@@ -29,8 +29,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "     OR :onlyAvailable = FALSE) " +
             "AND e.state = :state " +
             "ORDER BY " +
-            "CASE WHEN :sort = 'EVENT_DATE' THEN e.eventDate END ASC, " +
-            "CASE WHEN :sort = 'VIEWS' THEN e.views END DESC")
+            "CASE WHEN :sort = 'EVENT_DATE' THEN e.eventDate END ASC")
     List<Event> findCommonEventsByFilters(
             @Param("text") String text,
             @Param("paid") Boolean paid,
@@ -95,16 +94,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         );
     }
 
-    @Query("SELECT e FROM events e " +
-            "WHERE e.initiator.id = :user " +
-            "ORDER BY e.eventDate DESC")
-    List<Event> findAllByInitiatorId(@Param("user") Long userId, Pageable pageable);
+    List<Event> findAllByInitiatorIdOrderByEventDateDesc(@Param("user") Long userId, Pageable pageable);
 
-    default List<Event> findAllByInitiatorId(Long userId, Integer from, Integer size) {
+    default List<Event> findAllByInitiatorIdOrderByEventDateDesc(Long userId, Integer from, Integer size) {
         if (from != null && size != null) {
-            return findAllByInitiatorId(userId, Pageable.ofSize(size).withPage(from / size));
+            return findAllByInitiatorIdOrderByEventDateDesc(userId, Pageable.ofSize(size).withPage(from / size));
         }
-        return findAllByInitiatorId(userId, Pageable.unpaged());
+        return findAllByInitiatorIdOrderByEventDateDesc(userId, Pageable.unpaged());
     }
 
     List<Event> findAllByCategoryId(Long categoryId);

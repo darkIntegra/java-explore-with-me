@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateEventDto {
+public class UpdateEventDto implements UpdateEventBaseDto {
 
     @Size(min = 20, max = 2000, message = "Аннотация должна содержать от 20 до 2000 символов")
     private String annotation;

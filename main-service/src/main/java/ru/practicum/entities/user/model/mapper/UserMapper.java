@@ -19,11 +19,4 @@ public class UserMapper {
                 .name(user.getName())
                 .build();
     }
-
-    public static UserDto toUserDtoWithoutEmail(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .build();
-    }
 }
