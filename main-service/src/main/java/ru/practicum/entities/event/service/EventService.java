@@ -24,6 +24,8 @@ import ru.practicum.utils.SimpleDateTimeFormatter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,9 +59,38 @@ public class EventService {
             throw new DateValidationException("Дата начала не должна быть позже даты окончания");
         }
 
+        // Получаем список событий
         List<Event> events = eventRepository.findCommonEventsByFilters(search);
+
+        // Формируем список URI для запроса статистики
+        List<String> uris = events.stream()
+                .map(event -> "/events/" + event.getId())
+                .toList();
+
+        // Запрашиваем статистику для всех URI (одним запросом)
+        LocalDateTime now = LocalDateTime.now();
+        List<StatsDto> stats = statsClient.getStats(
+                SimpleDateTimeFormatter.toString(LocalDateTime.of(1900, 1, 1, 0, 0)),
+                SimpleDateTimeFormatter.toString(now.plusMinutes(2)),
+                uris,
+                true
+        );
+
+        // Создаем map для быстрого доступа к статистике
+        Map<String, Long> statsMap = stats.stream()
+                .collect(Collectors.toMap(
+                        StatsDto::getUri,
+                        StatsDto::getHits
+                ));
+
+        // Добавляем статистику в список событий
         return events.stream()
-                .map(EventMapper::toEventDto)
+                .map(event -> {
+                    EventDto dto = EventMapper.toEventDto(event);
+                    Long views = statsMap.getOrDefault("/events/" + event.getId(), 0L);
+                    dto.setViews(views);
+                    return dto;
+                })
                 .toList();
     }
 

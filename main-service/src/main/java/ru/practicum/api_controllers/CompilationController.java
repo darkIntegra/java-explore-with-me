@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.entities.compilation.model.dto.CompilationDto;
 import ru.practicum.entities.compilation.model.dto.NewCompilationDto;
@@ -21,7 +20,6 @@ public class CompilationController {
 
     // Создание подборки событий
     @PostMapping("/admin/compilations")
-    @Transactional
     public ResponseEntity<CompilationDto> createCompilation(
             @Valid @RequestBody NewCompilationDto compilationDto) {
         CompilationDto createdCompilation = compilationService.createCompilation(compilationDto);
@@ -30,7 +28,6 @@ public class CompilationController {
 
     // Удаление подборки событий
     @DeleteMapping("/admin/compilations/{comId}")
-    @Transactional
     public ResponseEntity<Void> deleteCompilation(
             @PathVariable Long comId) {
         compilationService.deleteCompilation(comId);
@@ -39,7 +36,6 @@ public class CompilationController {
 
     // Обновление подборки событий
     @PatchMapping("/admin/compilations/{comId}")
-    @Transactional
     public ResponseEntity<CompilationDto> updateCompilation(
             @PathVariable Long comId,
             @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest) {

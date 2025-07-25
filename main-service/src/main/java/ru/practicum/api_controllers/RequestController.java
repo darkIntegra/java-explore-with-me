@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.entities.request.model.dto.EventRequestStatusUpdateRequest;
@@ -32,7 +31,6 @@ public class RequestController {
 
     // Изменение статуса заявок на участие в событии
     @PatchMapping("/events/{eventId}/requests")
-    @Transactional
     public ResponseEntity<EventRequestStatusUpdateResult> updateParticipationRequestStatus(
             @PathVariable Long userId,
             @PathVariable Long eventId,
@@ -50,7 +48,6 @@ public class RequestController {
 
     // Создание заявки на участие в событии
     @PostMapping("/requests")
-    @Transactional
     public ResponseEntity<ParticipationRequestDto> createParticipationRequest(
             @PathVariable Long userId,
             @RequestParam Long eventId) {
@@ -60,7 +57,6 @@ public class RequestController {
 
     // Отмена заявки на участие в событии
     @PatchMapping("/requests/{requestId}/cancel")
-    @Transactional
     public ResponseEntity<ParticipationRequestDto> cancelParticipationRequest(
             @PathVariable Long userId,
             @PathVariable Long requestId) {

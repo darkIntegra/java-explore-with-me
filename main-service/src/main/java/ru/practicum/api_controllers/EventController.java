@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.entities.event.model.dto.*;
@@ -65,7 +64,6 @@ public class EventController {
 
     // Создание нового события пользователем
     @PostMapping("/users/{userId}/events")
-    @Transactional
     public ResponseEntity<EventDto> createEvent(
             @PathVariable Long userId,
             @Valid @RequestBody EventDto newEventDto) {
@@ -84,7 +82,6 @@ public class EventController {
 
     // Обновление события пользователем
     @PatchMapping("/users/{userId}/events/{eventId}")
-    @Transactional
     public ResponseEntity<EventDto> updateEventByUser(
             @PathVariable Long userId,
             @PathVariable Long eventId,
