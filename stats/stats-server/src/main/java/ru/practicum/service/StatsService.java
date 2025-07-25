@@ -1,14 +1,64 @@
 package ru.practicum.service;
 
-import ru.practicum.RequestCreateDto;
-import ru.practicum.RequestDto;
-import ru.practicum.RequestOutputDto;
+import lombok.RequiredArgsConstructor;
+import ru.practicum.model.Stats;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ru.practicum.model.mapper.EndpointHitMapper;
+import ru.practicum.model.mapper.StatsMapper;
+import ru.practicum.repository.StatsRepository;
+import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.dto.StatsDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface StatsService {
-    RequestDto addRequest(RequestCreateDto requestCreateDto);
+@Service
+@RequiredArgsConstructor
+public class StatsService {
+    @Autowired
+    private final StatsRepository statsRepository;
 
-    List<RequestOutputDto> getStatsRequest(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique);
+    public EndpointHitDto hit(EndpointHitDto endpointHitDto) {
+        return EndpointHitMapper.toEndpointHitDto(
+                statsRepository.save(EndpointHitMapper.toEndpointHit(endpointHitDto))
+        );
+    }
+
+    public List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        validateDates(start, end);
+        return unique.equals(Boolean.TRUE)
+                ? getUniqueStats(start, end, uris)
+                : getStats(start, end, uris);
+    }
+
+    private void validateDates(LocalDateTime start, LocalDateTime end) {
+        if (start == null) {
+            throw new IllegalArgumentException("Дата начала не может быть пустой");
+        }
+
+        if (end == null) {
+            throw new IllegalArgumentException("Дата конца не может быть пустой");
+        }
+
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Дата начала не может быть позже даты конца");
+        }
+    }
+
+    private List<StatsDto> getUniqueStats(LocalDateTime start, LocalDateTime end, List<String> uris) {
+        return statsMapping(statsRepository.findUniqueStats(start, end, uris));
+    }
+
+    private List<StatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris) {
+        return statsMapping(statsRepository.findStats(start, end, uris));
+    }
+
+    private List<StatsDto> statsMapping(List<Stats> stats) {
+        return stats.stream()
+                .map(StatsMapper::toStatsDto)
+                .toList();
+    }
+
+
 }
