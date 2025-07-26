@@ -12,6 +12,7 @@ import ru.practicum.entities.event.model.enums.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -106,4 +107,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByCategoryId(Long categoryId);
 
     List<Event> findAllByIdIn(List<Long> list);
+
+    Optional<Event> findById(Long id);
 }

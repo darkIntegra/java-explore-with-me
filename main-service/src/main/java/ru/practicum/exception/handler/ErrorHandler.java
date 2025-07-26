@@ -8,9 +8,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.exception.ConditionsNotMetException;
-import ru.practicum.exception.DateValidationException;
-import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.*;
 import ru.practicum.utils.SimpleDateTimeFormatter;
 
 import java.time.LocalDateTime;
@@ -123,5 +121,29 @@ public class ErrorHandler {
             apiError.setMessage("Произошла непредвиденная ошибка.");
         }
         return apiError;
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleEntityNotFound(final EntityNotFoundException e) {
+        return ApiError.builder()
+                .errors(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).toList())
+                .status(HttpStatus.NOT_FOUND.toString())
+                .reason("Запрошенный объект не найден.")
+                .message(e.getMessage())
+                .timestamp(SimpleDateTimeFormatter.toString(LocalDateTime.now()))
+                .build();
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleAccessDeniedException(final AccessDeniedException e) {
+        return ApiError.builder()
+                .errors(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).toList())
+                .status(HttpStatus.FORBIDDEN.toString())
+                .reason("Недостаточно прав для выполнения операции.")
+                .message(e.getMessage())
+                .timestamp(SimpleDateTimeFormatter.toString(LocalDateTime.now()))
+                .build();
     }
 }
