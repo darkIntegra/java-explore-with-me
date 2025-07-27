@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.service.StatsService;
 import ru.practicum.dto.EndpointHitDto;
-import ru.practicum.utils.SimpleDateTimeFormatter;
+import ru.practicum.utils.DateTimeConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,8 +29,8 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<Object> getStats(@RequestParam(required = false) @DateTimeFormat(pattern = SimpleDateTimeFormatter.PATTERN) LocalDateTime start,
-                                           @RequestParam(required = false) @DateTimeFormat(pattern = SimpleDateTimeFormatter.PATTERN) LocalDateTime end,
+    public ResponseEntity<Object> getStats(@RequestParam(required = false) @DateTimeFormat(pattern = DateTimeConstants.DATE_TIME_FORMAT) LocalDateTime start,
+                                           @RequestParam(required = false) @DateTimeFormat(pattern = DateTimeConstants.DATE_TIME_FORMAT) LocalDateTime end,
                                            @RequestParam(required = false) List<String> uris,
                                            @RequestParam(defaultValue = "false") Boolean unique) {
         return ResponseEntity.ok(statsService.getStats(start, end, uris, unique));

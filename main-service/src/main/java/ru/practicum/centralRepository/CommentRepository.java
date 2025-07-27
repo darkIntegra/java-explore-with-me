@@ -45,4 +45,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             @Param("rangeStart") LocalDateTime rangeStart,
             @Param("rangeEnd") LocalDateTime rangeEnd,
             Pageable pageable);
+
+    @Query("SELECT c.event.id, COUNT(c) FROM comments c WHERE c.event.id IN :eventIds GROUP BY c.event.id")
+    List<Object[]> countByEventIdsGrouped(@Param("eventIds") List<Long> eventIds);
 }

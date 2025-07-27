@@ -8,7 +8,6 @@ import ru.practicum.entities.user.model.mapper.UserMapper;
 import java.time.LocalDateTime;
 
 public class CommentMapper {
-
     // Преобразование DTO в сущность Comment
     public static Comment toComment(CommentDto commentNewDto, User user, Event event) {
         return Comment.builder()

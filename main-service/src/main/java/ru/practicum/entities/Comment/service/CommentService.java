@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.centralRepository.CommentRepository;
 import ru.practicum.centralRepository.EventRepository;
 import ru.practicum.centralRepository.UserRepository;
+import ru.practicum.client.StatsClient;
+import ru.practicum.dto.StatsDto;
 import ru.practicum.entities.Comment.model.Comment;
 import ru.practicum.entities.Comment.model.CommentDto;
 import ru.practicum.entities.Comment.model.CommentMapper;
@@ -18,9 +20,11 @@ import ru.practicum.entities.user.model.User;
 import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.DateValidationException;
 import ru.practicum.exception.EntityNotFoundException;
+import ru.practicum.utils.DateTimeConstants;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +33,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final StatsClient statsClient;
 
     @Transactional(readOnly = true)
     public List<CommentDto> getComments(LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
@@ -70,8 +75,34 @@ public class CommentService {
         List<Comment> comments = commentRepository.findCommentsByEventIdAndDates(
                 eventId, rangeStart, rangeEnd, PageRequest.of(from / size, size));
 
+        // Формируем список URI для запроса статистики
+        List<String> uris = comments.stream()
+                .map(comment -> "/comments/" + comment.getId())
+                .toList();
+
+        // Запрашиваем статистику для всех URI (одним запросом)
+        List<StatsDto> stats = statsClient.getStats(
+                DateTimeConstants.toString(rangeStart),
+                DateTimeConstants.toString(rangeEnd),
+                uris,
+                true
+        );
+
+        // Создаем map для быстрого доступа к статистике
+        Map<String, Long> statsMap = stats.stream()
+                .collect(Collectors.toMap(
+                        StatsDto::getUri,
+                        StatsDto::getHits
+                ));
+
+        // Добавляем статистику в список комментариев
         return comments.stream()
-                .map(CommentMapper::toCommentDto)
+                .map(comment -> {
+                    CommentDto dto = CommentMapper.toCommentDto(comment);
+                    Long views = statsMap.getOrDefault("/comments/" + comment.getId(), 0L);
+                    dto.setViews(views);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 

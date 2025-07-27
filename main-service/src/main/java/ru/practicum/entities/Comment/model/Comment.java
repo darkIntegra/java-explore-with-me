@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.entities.event.model.Event;
 import ru.practicum.entities.user.model.User;
+import ru.practicum.utils.DateTimeConstants;
 
 import java.time.LocalDateTime;
 
@@ -33,6 +34,6 @@ public class Comment {
     String message;
 
     @Column(name = "created")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = DateTimeConstants.DATE_TIME_FORMAT)
     LocalDateTime created;
 }

@@ -1,26 +1,29 @@
 package ru.practicum.entities.Comment.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import ru.practicum.entities.event.model.dto.EventDto;
 import ru.practicum.entities.user.model.dto.UserDto;
 
 import java.time.LocalDateTime;
 
+@Data
 @Builder
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentDto {
     private Long id;
 
-    UserDto user;
+    private UserDto user;
 
-    EventDto event;
+    private EventDto event;
 
-    String message;
+    @NotBlank(message = "Комментарий не должен быть пустым")
+    @Size(min = 3, max = 2000, message = "Размер комментария должен быть от 3 до 2000 символов")
+    private String message;
 
-    LocalDateTime created;
+    private LocalDateTime created;
+
+    private Long views;
 }
