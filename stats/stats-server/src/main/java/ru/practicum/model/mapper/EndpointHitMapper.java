@@ -3,7 +3,7 @@ package ru.practicum.model.mapper;
 import org.springframework.stereotype.Component;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.model.EndpointHit;
-import ru.practicum.utils.SimpleDateTimeFormatter;
+import ru.practicum.utils.DateTimeConstants;
 
 import java.time.LocalDateTime;
 
@@ -23,7 +23,7 @@ public class EndpointHitMapper {
                 .app(endpointHit.getApp())
                 .uri(endpointHit.getUri())
                 .ip(endpointHit.getIp())
-                .timestamp(SimpleDateTimeFormatter.toString(endpointHit.getTimestamp()))
+                .timestamp(DateTimeConstants.toString(endpointHit.getTimestamp()))
                 .build();
     }
 }
